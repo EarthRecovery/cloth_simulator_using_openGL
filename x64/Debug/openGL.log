@@ -1,11 +1,19 @@
-﻿  main.cpp
-E:\code\openGL\main.cpp(159,28): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-E:\code\openGL\main.cpp(244,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-E:\code\openGL\main.cpp(245,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-E:\code\openGL\main.cpp(249,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-E:\code\openGL\main.cpp(250,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-E:\code\openGL\main.cpp(251,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-E:\code\openGL\main.cpp(252,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+﻿  Camera.cpp
+  cloth.cpp
+E:\code\openGL\cloth.cpp(153,19): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
+  main.cpp
+E:\code\openGL\cloth.cpp(153,19): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
+E:\code\openGL\main.cpp(126,47): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+E:\code\openGL\main.cpp(190,58): warning C4267: “参数”: 从“size_t”转换到“GLsizei”，可能丢失数据
+E:\code\openGL\main.cpp(238,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+E:\code\openGL\main.cpp(239,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+E:\code\openGL\main.cpp(243,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+E:\code\openGL\main.cpp(244,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+E:\code\openGL\main.cpp(245,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+E:\code\openGL\main.cpp(246,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+  Shader.cpp
+  stb_image.cpp
+  正在生成代码...
   openGL.vcxproj -> E:\code\openGL\x64\Debug\openGL.exe
   'pwsh.exe' 不是内部或外部命令，也不是可运行的程序
   或批处理文件。

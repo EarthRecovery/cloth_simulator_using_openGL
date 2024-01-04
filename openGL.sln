@@ -5,6 +5,8 @@ VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "openGL", "openGL.vcxproj", "{12473FFB-858E-49DE-AE68-3CB8E65B7DF6}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SetupClothProject", "..\SetupClothProject\SetupClothProject.vdproj", "{42B7D669-E130-41BF-9C82-3E38420A920C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,10 @@ Global
 		{12473FFB-858E-49DE-AE68-3CB8E65B7DF6}.Release|x64.Build.0 = Release|x64
 		{12473FFB-858E-49DE-AE68-3CB8E65B7DF6}.Release|x86.ActiveCfg = Release|Win32
 		{12473FFB-858E-49DE-AE68-3CB8E65B7DF6}.Release|x86.Build.0 = Release|Win32
+		{42B7D669-E130-41BF-9C82-3E38420A920C}.Debug|x64.ActiveCfg = Debug
+		{42B7D669-E130-41BF-9C82-3E38420A920C}.Debug|x86.ActiveCfg = Debug
+		{42B7D669-E130-41BF-9C82-3E38420A920C}.Release|x64.ActiveCfg = Release
+		{42B7D669-E130-41BF-9C82-3E38420A920C}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

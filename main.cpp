@@ -10,62 +10,24 @@ using namespace std;
 #include <vector>
 #include <string>
 #include <fstream>
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include "Camera.h"
 #include "Shader.h"
 #include "stb_image.h"
+#include "cloth.cpp"
 
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-
-float vertices[] = {
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-    0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-    0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-    0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-    -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-    0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-    0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-    0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-
-    -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
-    -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
-    -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
-
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
-    0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-    0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-    0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
-    0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
-    0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
-    0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
-    -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
-
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-    0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f };
+void updateTriangleVertices(Cloth& c, unsigned int VBO);
 
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
-const GLint WIDTH = 1920, HEIGHT = 1080;
+const GLint SCREEN_WIDTH = 1920, SCREEN_HEIGHT = 1080;
 
 // camera setting--------------
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -79,18 +41,21 @@ float lastFrame = 0.0f; // 上一帧的时间
 // mouse setting---------------
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 bool firstMouse = true;
-float lastX = WIDTH / 2.0;
-float lastY = HEIGHT / 2.0;
+float lastX = SCREEN_WIDTH / 2.0;
+float lastY = SCREEN_HEIGHT / 2.0;
 
-// color-----------------------
-glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
+std::vector<float> vertices;
 
+float px = 0.0f;
+float py = 0.0f;
+float pz = 0.0f;
+
+bool Line = true;
 int main()
 {
     // open window--------------
     glfwInit();
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Learn OpenGL Triangle test", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Learn OpenGL Triangle test", nullptr, nullptr);
 
     int screenWidth_1, screenHeight_1;
     glfwGetFramebufferSize(window, &screenWidth_1, &screenHeight_1);
@@ -110,42 +75,75 @@ int main()
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // 隐藏鼠标
     //--------------------------
 
+    //Imgui setting
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext(); //创建上下文
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // 允许键盘控制
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // 允许游戏手柄控制
+
+    // 设置渲染器后端
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init();
+
     // set depth test------------
     glEnable(GL_DEPTH_TEST);
     //--------------------------
 
+    //set original vertices
+    Cloth c;
+    std::vector<glm::vec3> pointList;
+    for (int i = 0;i < HEIGHT-1;i++) {
+        for (int j = 0;j < LENGTH-1;j++) {
+            pointList.push_back(c.CurrentPointArray[i][j].position);
+            pointList.push_back(c.CurrentPointArray[i][j+1].position);
+            pointList.push_back(c.CurrentPointArray[i+1][j+1].position);
+            pointList.push_back(c.CurrentPointArray[i][j].position);
+            pointList.push_back(c.CurrentPointArray[i+1][j].position);
+            pointList.push_back(c.CurrentPointArray[i + 1][j + 1].position);
+        }
+    }
+
+    for (auto& point : pointList) {
+        vertices.push_back(point.x);
+        vertices.push_back(point.y);
+        vertices.push_back(point.z);
+    }
+
     // set shader----------------
     Shader lightingShader("colors.vert", "colors.frag");
-    Shader lightCubeShader("light_cube.vert", "light_cube.frag");
     //--------------------------
 
-    // set VAO VBO EBO-----------
-    unsigned int VBO, cubeVAO;
-    glGenVertexArrays(1, &cubeVAO);
+    unsigned int VAO, VBO;
+    // 创建并绑定顶点数组对象（VAO）
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // 创建并绑定顶点缓冲对象（VBO）
     glGenBuffers(1, &VBO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindVertexArray(cubeVAO);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
-    unsigned int lightCubeVAO;
-    glGenVertexArrays(1, &lightCubeVAO);
-    glBindVertexArray(lightCubeVAO);
-
-    // we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    int a = sizeof(vertices) * vertices.size();
+
+    // 初次将顶点数据存储到VBO中
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) * vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
+
+    // 配置顶点属性指针
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    //--------------------------
+
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR) {
+        std::cerr << "OpenGL error: " << error << std::endl;
+    }
+
+    // 解绑VBO和VAO
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    // 在渲染之前启用线框模式
+    
+    if (Line) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -155,64 +153,60 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // control camera speed--------
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        
+        // 创建用户界面
+        ImGui::Begin("Control Panel");
+        ImGui::SliderFloat("X", &px, -1.0f, 1.0f);
+        ImGui::SliderFloat("Y", &py, -1.0f, 1.0f);
+        ImGui::SliderFloat("Z", &pz, -1.0f, 1.0f);
+        if (ImGui::Button("Update Vertices"))
+        {
+            c.changePointPosition(px, py, pz);
+        }
+        ImGui::End();
+        
+        deltaTime = 0.01f;
 
-
-        // keyboard input and camera setting
         processInput(window);
 
         lightingShader.use();
-        lightingShader.setVec3("objectColor", 0.5f,0.5f,0.5f);
-        lightingShader.setVec3("lightColor", lightColor);
-        lightingShader.setVec3("viewPos", camera.Position);
-        lightingShader.setVec3("material.ambient", 0.1f, 0.1f, 0.1f);
-        lightingShader.setVec3("material.diffuse", 0.5f, 0.5f, 0.5f);
-        lightingShader.setVec3("material.specular", 1.0f, 1.0f, 1.0f);
-        lightingShader.setFloat("material.shininess", 32.0f);
-        lightingShader.setVec3("light.ambient", 1.0f, 1.0f, 1.0f);
-        lightingShader.setVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
-        lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-        lightingShader.setVec3("light.position", lightPos);
 
-        // view/projection transformations
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
         lightingShader.setMat4("projection", projection);
         lightingShader.setMat4("view", view);
-
-        // world transformation
+        
         glm::mat4 model = glm::mat4(1.0f);
         lightingShader.setMat4("model", model);
 
-        // render the cube
-        glBindVertexArray(cubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        if (error != GL_NO_ERROR) {
+            std::cerr << "OpenGL error: " << error << std::endl;
+        }
+        
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 3);
 
-        // also draw the lamp object
-        lightCubeShader.use();
-        lightCubeShader.setMat4("projection", projection);
-        lightCubeShader.setMat4("view", view);
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
-        lightCubeShader.setMat4("model", model);
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        glBindVertexArray(lightCubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        if (glfwGetTime() > 0.002) {
+            updateTriangleVertices(c, VBO);
+            glfwSetTime(0.0);
+        }
 
         glfwSwapBuffers(window);
     }
-    //--------------------------
+    if(Line) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    // delete VAO VBO EBO---------
-    glDeleteVertexArrays(1, &cubeVAO);
-    glDeleteVertexArrays(1, &lightCubeVAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteVertexArrays(1, &VBO);
 
-    //--------------------------
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
@@ -266,4 +260,33 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
+}
+
+void updateTriangleVertices(Cloth& c, unsigned int VBO) {
+    vertices.clear();
+    c.run();
+    std::vector<glm::vec3> pointList;
+    for (int i = 0;i < HEIGHT - 1;i++) {
+        for (int j = 0;j < LENGTH - 1;j++) {
+            pointList.push_back(c.CurrentPointArray[i][j].position);
+            pointList.push_back(c.CurrentPointArray[i][j + 1].position);
+            pointList.push_back(c.CurrentPointArray[i + 1][j + 1].position);
+            pointList.push_back(c.CurrentPointArray[i][j].position);
+            pointList.push_back(c.CurrentPointArray[i + 1][j].position);
+            pointList.push_back(c.CurrentPointArray[i + 1][j + 1].position);
+        }
+    }
+
+    for (auto& point : pointList) {
+        vertices.push_back(point.x);
+        vertices.push_back(point.y);
+        vertices.push_back(point.z);
+    }
+
+    // 将新的顶点数据存储到VBO中
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) * vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
+
+    // 解绑VBO
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
